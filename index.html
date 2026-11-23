@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Guess Game</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: linear-gradient(135deg, #312e81, #7c3aed 55%, #f59e0b);
+        color: #292524;
+      }
+
+      .main-container {
+        width: 100%;
+        max-width: 480px;
+        margin: 16px;
+        padding: 28px 32px 32px;
+        background: #fffaf2;
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(67, 20, 7, 0.28);
+      }
+
+      h2 {
+        margin: 0 0 12px;
+        font-size: 2rem;
+        color: #6d28d9;
+      }
+
+      .input {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      #guess-value {
+        width: 100%;
+        padding: 10px 14px;
+        font-size: 1.1rem;
+        border: 2px solid #fcd34d;
+        border-radius: 10px;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+
+      #guess-value:focus {
+        border-color: #7c3aed;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.22);
+      }
+
+      button {
+        align-self: flex-start;
+        padding: 10px 22px;
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #ffffff;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: transform 0.1s, filter 0.2s;
+      }
+
+      button:hover {
+        filter: brightness(1.1);
+      }
+
+      button:active {
+        transform: scale(0.96);
+      }
+
+      #guess-btn {
+        background: #7c3aed;
+      }
+
+      #restart-btn {
+        background: #ea580c;
+      }
+
+      hr {
+        margin: 20px 0 14px;
+        border: none;
+        border-top: 1px solid #e7d5b5;
+      }
+
+      #result {
+        min-height: 1.6em;
+        font-size: 1.15rem;
+      }
+
+      #result.hint {
+        color: #b45309;
+      }
+
+      #result.win {
+        color: #16a34a;
+        font-size: 1.8rem;
+        font-weight: 700;
+      }
+
+      #result.lose {
+        color: #dc2626;
+        font-size: 1.8rem;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-container">
+      <h2>Guess Game</h2>
+      <div style="margin-bottom: 10px">
+        Guess a number between 1 - 20, you have 5 chances.
+      </div>
+      <div class="input">
+        <input type="text" id="guess-value" name="guess-value" />
+        <button id="guess-btn">Guess!</button>
+        <button id="restart-btn">Restart</button>
+      </div>
+      <hr />
+      <div id="attempt-text" style="margin-bottom: 10px">
+        Attempt <span id="attempt"></span>/5
+      </div>
+      <div id="result"></div>
+    </div>
+
+    <script>
+      var MAX_ATTEMPTS = 5;
+      var target = 0;
+      var attempt = 0;
+      var playing = false;
+
+      function isNumeric(value) {
+        return value.trim() !== "" && !isNaN(value) && isFinite(value);
+      }
+
+      function showResult(text, cssClass) {
+        var result = document.getElementById("result");
+        result.innerHTML = text;
+        result.className = cssClass || "";
+      }
+
+      function showAttempt() {
+        document.getElementById("attempt").innerHTML = attempt;
+      }
+
+      function showRestartOnly() {
+        document.getElementById("guess-btn").style.display = "none";
+        document.getElementById("restart-btn").style.display = "block";
+      }
+
+      function showGuessOnly() {
+        document.getElementById("restart-btn").style.display = "none";
+        document.getElementById("guess-btn").style.display = "block";
+      }
+
+      function endGame(message, cssClass) {
+        playing = false;
+        showResult(message, cssClass);
+        showRestartOnly();
+      }
+
+      function restartGame() {
+        target = Math.floor(Math.random() * 20) + 1;
+        attempt = 0;
+        playing = true;
+
+        showGuessOnly();
+        showAttempt();
+        showResult("");
+
+        var input = document.getElementById("guess-value");
+        input.value = "";
+        input.focus();
+      }
+
+      function guess() {
+        if (!playing) return;
+
+        var input = document.getElementById("guess-value");
+        var value = input.value;
+
+        if (!isNumeric(value)) return;
+
+        var number = Number(value);
+        attempt++;
+        showAttempt();
+
+        if (number === target) {
+          endGame("You WIN", "win");
+        } else if (attempt >= MAX_ATTEMPTS) {
+          endGame("You LOSE", "lose");
+        } else if (number > target) {
+          showResult(number + " is too high", "hint");
+        } else {
+          showResult(number + " is too low", "hint");
+        }
+
+        input.value = "0";
+        input.focus();
+        input.select();
+      }
+
+      document.getElementById("guess-btn").addEventListener("click", guess);
+      document
+        .getElementById("restart-btn")
+        .addEventListener("click", restartGame);
+      document
+        .getElementById("guess-value")
+        .addEventListener("keydown", function (event) {
+          if (event.key === "Enter") guess();
+        });
+
+      document.getElementById("guess-value").value = "";
+      showRestartOnly();
+      showAttempt();
+      showResult("");
+    </script>
+  </body>
+</html>
